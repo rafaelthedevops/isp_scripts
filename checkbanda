@@ -1,0 +1,25 @@
+#!/usr/local/rvm/rubies/ruby-2.3.0/bin/ruby
+# Community hostname/ip address and interface number 
+# ARG[0] = Community 
+# ARG[1] = HOSTNAME or IP address
+# ARG[2] = Network Interface Number
+#
+def from_bit_to_mega bit
+    ((((((bit)/10)*8)/1024)/1024))
+end
+
+def get_bytes
+    `snmpget -v2c -c "#{ARGV[0]}" "#{ARGV[1]}" "1.3.6.1.2.1.31.1.1.1.6."#{ARGV[2]}"" "1.3.6.1.2.1.31.1.1.1.10."#{ARGV[2]}"" | awk '{print $4}' | awk -v ORS=" " 1`
+end
+
+rate_initial= get_bytes.split
+i_initial = rate_initial.first.to_i
+o_initial = rate_initial.last.to_i
+sleep 10
+
+rate_final =  get_bytes.split
+i_final = rate_final.first.to_i
+o_final = rate_final.last.to_i
+
+puts " ok - rx: #{from_bit_to_mega(i_final - i_initial)} tx:#{from_bit_to_mega(o_final - o_initial)} | rx=#{from_bit_to_mega(i_final - i_initial)} tx=#{from_bit_to_mega(o_final - o_initial)}"
+exit 0
